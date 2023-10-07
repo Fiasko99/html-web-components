@@ -1,0 +1,14 @@
+<template>
+  <span>
+    <div>text</div>
+  </span>
+  <slot name="default"></slot>
+</template>
+
+<script>
+
+</script>
+
+<style>
+
+</style>
