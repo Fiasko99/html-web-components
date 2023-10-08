@@ -1,85 +1,62 @@
-function setInnerHTML(elm, html) {
-  elm.innerHTML = html;
-  Array.from(elm.querySelectorAll("script"))
-    .forEach(oldScriptEl => {
-      const newScriptEl = document.createElement("script");
-      Array.from(oldScriptEl.attributes).forEach( attr => {
-        newScriptEl.setAttribute(attr.name, attr.value)
-      });
-      const scriptText = document.createTextNode(oldScriptEl.innerHTML);
-      newScriptEl.appendChild(scriptText);
-      oldScriptEl.parentNode.replaceChild(newScriptEl, oldScriptEl);
-  });
+class AppCommon extends HTMLElement {
+  constructor() {
+    super();
+  };
+
+  async _setContent(pathToView) {
+    const contentStr = await fetch(pathToView).then(res => res.text());
+    const htmlView = new DOMParser().parseFromString(contentStr, 'text/html');
+    return htmlView.head.firstChild.content;
+  };
 }
 
-function main() {
-  class AppCommon extends HTMLElement {
-    constructor() {
-      super();
-    };
+class AppSample extends AppCommon {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  };
 
-    _getPage(path) {
-      return new Promise((res, rej) => {
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-          if (this.readyState === 4 && this.status === 200) {
-            res(this.responseText);
-          } 
-        };
-        xhttp.open("GET", path);
-        xhttp.send();
-      })
-    }
+  async #routing() {
+    const { hash } = window.location;
+    const view = hash ? hash.substring(1) : '/home';
+    const pathToView = `/src/views${view}/index.html`;
+    const content = await this._setContent(pathToView);
+    this.shadowRoot.replaceChildren(content);
   }
-  class AppSample extends AppCommon{
-    #view = '/home';
-    #pathToViews = '/views'
 
-    constructor() {
-      super();
-    };
-
-    async #routing() {
-      const { hash } = window.location;
-      this.#view = hash.substring(1);
-      const pathToView = `/src${this.#pathToViews}${this.#view}/index.htv`;
-      const contentStr = await this._getPage(pathToView);
-      const template = new DOMParser().parseFromString(contentStr, 'text/html').head.firstChild;
-      template.content.children.default.append(...this.children);
-      const content = template.content.cloneNode(true);
-      this.parentElement.replaceChild(content, this)
-    }
-
-    connectedCallback() {
-      window.location.hash && this.#routing();
-      window.addEventListener('hashchange', () => this.#routing());
-    };
+  connectedCallback() {
+    this.#routing(); 
+    window.addEventListener('hashchange', () => this.#routing());
   };
-  class AppComponent extends AppCommon{
-    constructor() {
-      super();
-    }
+};
 
-    connectedCallback() {
+class AppComponent extends AppCommon {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
 
-    }
-  };
-  class AppLink extends AppCommon{
-    constructor() {
-      super();
-    }
+  async connectedCallback() {
+    const component = this.getAttribute('html-component');
+    const pathToComponent = `/src${component}/index.html`;
+    this.shadowRoot.appendChild(await this._setContent(pathToComponent));
+  }
+};
 
-    connectedCallback() {
-      this.addEventListener('click', (e) => {
-        const path = this.getAttribute('to')
-        history.pushState(null, null, `#${path}`)
-      })
-    }
-  };
-  customElements.define('app-sample', AppSample)
-  customElements.define('app-component', AppComponent)
-  customElements.define('app-link', AppLink)
-  
-}
+class AppLink extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.addEventListener('click', () => {
+      window.location.hash = this.getAttribute('to');
+    })
+  }
+};
+
+customElements.define('app-sample', AppSample)
+customElements.define('app-component', AppComponent)
+customElements.define('app-link', AppLink)
+
 if (window.location.pathname === '/index.html') window.location.pathname = '';
-main()

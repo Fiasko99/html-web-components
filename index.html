@@ -7,15 +7,14 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <app-sample>
-    <div>
-      <div>text</div>
+  <app-component class="example" html-component="/components/header">
+    <div slot="default">
+      <app-link to="/home">Ссылка 1</app-link>
+      <app-link to="/products">Ссылка 1</app-link>
+      <div>Hello header from home2</div>
     </div>
-    <app-link to="/home">link</app-link>
-    <app-link to="/home">link</app-link>
-    <app-link to="/home">link</app-link>
-    <div>Hello worlf</div>
-  </app-sample>
+  </app-component>
+  <app-sample class="example"></app-sample>
   <script src="script.js"></script>
 </body>
 </html>
