@@ -1,14 +1,32 @@
 <template>
-  <span>
-    <div>Hello header</div>
-  </span>
-  <slot name="default"></slot>
+  <header class="header">
+    <div class="secondary-resources">
+      <div class="left">
+        <div class="currency">RUB</div>
+        <div class="delivery-address">Пункт Ozon • ул. Перерва, вл31Б</div>
+      </div>
+      <div id="123" class="right"></div>
+    </div>
+  </header>
 </template>
 
 <script>
-
-</script>
-
-<style>
-
-</style>
+  const resources = [
+    'Стать продавцом',
+    'Покупать как компания',
+    'Мобильное приложение',
+    'Подарочные сертификаты',
+    'Помощь',
+  ];
+  const right = document.querySelector('.right');
+  
+  resources.forEach(resource => {
+    right.innerHTML += `<div>${resource}</div>`
+  })
+  </script>
+  
+  <style>
+  .header {
+    font-size: 14px;
+  }
+  </style>

@@ -3,10 +3,20 @@ class AppCommon extends HTMLElement {
     super();
   };
 
-  async _setContent(pathToView) {
-    const contentStr = await fetch(pathToView).then(res => res.text());
+  async _setContent(pathToContent) {
+    const contentStr = await fetch(pathToContent).then(res => res.text());
     const htmlView = new DOMParser().parseFromString(contentStr, 'text/html');
-    return htmlView.head.firstChild.content;
+    const content = {
+      style: htmlView.head.querySelector('style'),
+      html: htmlView.head.querySelector('template').content.cloneNode(true),
+    }
+    const script = document.createElement('script');
+    script.innerHTML = htmlView.head.querySelector('script').innerHTML;
+    const docFragment = document.createDocumentFragment();
+    docFragment.appendChild(content.style);
+    docFragment.appendChild(content.html);
+    docFragment.appendChild(script);
+    this.replaceWith(docFragment);
   };
 }
 
@@ -20,8 +30,7 @@ class AppSample extends AppCommon {
     const { hash } = window.location;
     const view = hash ? hash.substring(1) : '/home';
     const pathToView = `/src/views${view}/index.html`;
-    const content = await this._setContent(pathToView);
-    this.shadowRoot.replaceChildren(content);
+    this._setContent(pathToView);
   }
 
   connectedCallback() {
@@ -33,13 +42,12 @@ class AppSample extends AppCommon {
 class AppComponent extends AppCommon {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
   }
 
-  async connectedCallback() {
+  connectedCallback() {
     const component = this.getAttribute('html-component');
     const pathToComponent = `/src${component}/index.html`;
-    this.shadowRoot.appendChild(await this._setContent(pathToComponent));
+    this._setContent(pathToComponent);
   }
 };
 
