@@ -19,8 +19,12 @@ class AppCommon extends HTMLElement {
     style.innerHTML = styletStr
 
     const contentStr = await getFileText('html')
-    const htmlView = new DOMParser().parseFromString(contentStr, 'text/html')
-    const content = htmlView.head.querySelector('template').content.cloneNode(true)
+    const htmlView = new DOMParser()
+      .parseFromString(contentStr, 'text/html')
+    const content = htmlView.head
+      .querySelector('template')
+      .content
+      .cloneNode(true)
     
     const scriptStr = await getFileText('js')
     const script = document.createElement('script')
@@ -30,6 +34,7 @@ class AppCommon extends HTMLElement {
     docFragment.appendChild(style)
     docFragment.appendChild(content)
     docFragment.appendChild(script)
+
     this.replaceWith(docFragment)
   }
 }
@@ -37,11 +42,10 @@ class AppCommon extends HTMLElement {
 class AppSample extends AppCommon {
   constructor() {
     super()
-    this.attachShadow({ mode: 'open' })
   }
 
   async #routing() {
-    const { hash } = window.location
+    const { hash } = location
     this._setContent(`/src/views${hash ? hash.substring(1) : '/home'}`)
   }
 
@@ -57,7 +61,7 @@ class AppComponent extends AppCommon {
   }
 
   connectedCallback() {
-    const component = this.getAttribute('html-component')
+    const component = this.getAttribute('from')
     this._setContent( `/src${component}`)
   }
 }
@@ -69,7 +73,7 @@ class AppLink extends HTMLElement {
 
   connectedCallback() {
     this.addEventListener('click', () => {
-      window.location.hash = this.getAttribute('to')
+      location.hash = this.getAttribute('to')
     })
   }
 }
@@ -78,4 +82,4 @@ customElements.define('app-sample', AppSample)
 customElements.define('app-component', AppComponent)
 customElements.define('app-link', AppLink)
 
-if (window.location.pathname === '/index.html') window.location.pathname = ''
+if (location.pathname === '/index.html') location.pathname = ''

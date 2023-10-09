@@ -1,0 +1,16 @@
+.secondary-resources {
+  display: flex;
+  justify-content: space-between;
+}
+
+.left {
+  display: flex;
+  justify-content: start;
+  gap: 8px;
+}
+
+.right {
+  display: flex;
+  justify-self: end;
+  gap: 8px;
+}
